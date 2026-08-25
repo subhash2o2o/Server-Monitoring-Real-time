@@ -1,0 +1,23 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    environment:
+      - LOG_PATH=/logs/deploy.log
+      - HEARTBEAT_SECONDS=10
+      - START_FROM_BEGINNING=0
+    volumes:
+      # Log file is mounted read-only; backend must never write.
+      - ./logs:/logs:ro
+    expose:
+      - "8000"
+
+  nginx:
+    image: nginx:1.27-alpine
+    depends_on:
+      - backend
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./web:/usr/share/nginx/html:ro

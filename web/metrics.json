@@ -1,0 +1,63 @@
+{
+  "ok": true,
+  "ts_ms": 1787679528000,
+  "core": {
+    "cpu_percent": 1.6,
+    "load_1m": 1.49,
+    "load_5m": 0.81,
+    "load_15m": 0.55,
+    "memory": {
+      "total": 8193789952,
+      "used": 970539008,
+      "free": 6361460736,
+      "available": 7206621184,
+      "percent": 11.8
+    },
+    "swap": {
+      "total": 2147483648,
+      "used": 0,
+      "percent": 0.0
+    },
+    "uptime": "3d 17h 18m",
+    "uptime_seconds": 321535
+  },
+  "disk": {
+    "partitions": [{"mount":"/mnt/wsl/docker-desktop/docker-desktop-user-distro","used":74145792,"total":142625792,"available":57397248,"percent":51},{"mount":"/mnt/wsl/docker-desktop/cli-tools","used":839634944,"total":839634944,"available":0,"percent":100},{"mount":"/","used":1753235456,"total":1081101176832,"available":1024355586048,"percent":0}],
+    "inodes": [{"mount":"/mnt/wsl/docker-desktop/docker-desktop-user-distro","used":836,"total":38608,"percent":2},{"mount":"/mnt/wsl/docker-desktop/cli-tools","used":0,"total":0,"percent":0},{"mount":"/","used":55031,"total":67108864,"percent":0}],
+    "io": {"reads":4945876,"writes":49559834,"read_bytes":2532288512,"write_bytes":25374635008},
+    "iowait_percent": 0.0
+  },
+  "network": {
+    "traffic": {"rx_bytes":204408037,"tx_bytes":2267931,"rx_packets":166638,"tx_packets":27707,"rx_errors":0,"tx_errors":0,"rx_drops":0,"tx_drops":0},
+    "interfaces": [{"name":"eth0","status":"up"}],
+    "tcp_states": {"established":6,"listen":9,"time_wait":0,"close_wait":0,"total":15}
+  },
+  "processes": {
+    "total": 72,
+    "running": 1,
+    "zombie": 0,
+    "top_cpu": [{"pid":244114,"user":"abc","cpu":0.9,"mem":0.0,"cmd":"/bin/bash"},{"pid":275286,"user":"root","cpu":0.4,"mem":0.0,"cmd":"bash"},{"pid":202675,"user":"root","cpu":0.4,"mem":0.0,"cmd":"bash"},{"pid":98468,"user":"root","cpu":0.4,"mem":0.0,"cmd":"bash"},{"pid":139296,"user":"root","cpu":0.3,"mem":0.0,"cmd":"bash"}],
+    "top_mem": [{"pid":21064,"user":"root","cpu":0.0,"mem":0.2,"cmd":"/usr/libexec/packagekitd"},{"pid":261,"user":"root","cpu":0.0,"mem":0.2,"cmd":"/usr/bin/python3"},{"pid":206,"user":"root","cpu":0.0,"mem":0.2,"cmd":"/usr/bin/python3"},{"pid":15168,"user":"systemd+","cpu":0.0,"mem":0.1,"cmd":"/lib/systemd/systemd-reso"},{"pid":35349,"user":"root","cpu":0.0,"mem":0.1,"cmd":"sshd"}]
+  },
+  "services": {
+    "list": [{"name":"console-getty","status":"running"},{"name":"cron","status":"running"},{"name":"dbus","status":"running"},{"name":"getty@tty1","status":"running"},{"name":"networkd-dispatcher","status":"running"},{"name":"nginx","status":"running"},{"name":"packagekit","status":"running"},{"name":"polkit","status":"running"}],
+    "failed_count": 0
+  },
+  "logs": {
+    "auth_failures": 0
+0,
+    "kernel_errors": 25
+  },
+  "security": {
+    "logged_users": 1,
+    "users_list": [{"user":"abc","tty":"pts/1"}]
+  },
+  "system": {
+    "hostname": "Si-ya",
+    "os": "Ubuntu 22.04.5 LTS",
+    "kernel": "6.6.87.2-microsoft-standard-WSL2",
+    "cpu_model": "11th Gen Intel(R) Core(TM) i5-1135G7 @ 2.40GHz",
+    "cpu_cores": 8,
+    "cpu_temp": null
+  }
+}

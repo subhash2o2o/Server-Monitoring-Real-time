@@ -1,0 +1,232 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SSE Log Stream</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    body { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; margin: 0; }
+    header { padding: 12px 16px; background: #111827; color: #fff; }
+    #status { opacity: 0.85; font-size: 12px; }
+    #metrics { padding: 16px; background: #0f172a; color: #e5e7eb; border-bottom: 1px solid #1f2937; }
+    #metricsRow { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .metricBox { background: #111827; border: 1px solid #1f2937; border-radius: 8px; padding: 10px 12px; min-width: 220px; }
+    .metricLabel { font-size: 12px; opacity: 0.8; }
+    .metricValue { font-size: 18px; margin-top: 4px; }
+    #chartWrap { margin-top: 12px; background: #0b1020; border: 1px solid #1f2937; border-radius: 8px; padding: 12px; height: 280px; }
+    #metricsChart { width: 100% !important; height: 100% !important; }
+    #log { height: calc(100vh - 450px); overflow: auto; padding: 12px 16px; background: #0b1020; color: #d1d5db; min-height: 200px; }
+    .line { white-space: pre-wrap; }
+    .INFO { color: #a7f3d0; }
+    .WARN { color: #fde68a; }
+    .ERROR { color: #fca5a5; }
+  </style>
+</head>
+<body>
+  <header>
+    <div><strong>Real-time Deploy Logs (SSE)</strong></div>
+    <div id="status">connecting…</div>
+  </header>
+
+  <section id="metrics">
+    <div><strong>Live CPU / Memory</strong> <span style="opacity:0.75; font-size:12px;">(container view)</span></div>
+    <div id="metricsRow">
+      <div class="metricBox">
+        <div class="metricLabel">CPU</div>
+        <div class="metricValue" id="cpuText">—</div>
+      </div>
+      <div class="metricBox">
+        <div class="metricLabel">Memory</div>
+        <div class="metricValue" id="memText">—</div>
+      </div>
+      <div class="metricBox">
+        <div class="metricLabel">Backend RSS</div>
+        <div class="metricValue" id="rssText">—</div>
+      </div>
+    </div>
+    <div id="chartWrap">
+      <canvas id="metricsChart"></canvas>
+    </div>
+  </section>
+
+  <div id="log"></div>
+
+  <script>
+    const statusEl = document.getElementById('status');
+    const logEl = document.getElementById('log');
+    const cpuText = document.getElementById('cpuText');
+    const memText = document.getElementById('memText');
+    const rssText = document.getElementById('rssText');
+
+    function bytesToMiB(bytes) {
+      return (bytes / (1024 * 1024)).toFixed(1);
+    }
+
+    function appendLine(text) {
+      const div = document.createElement('div');
+      div.className = 'line';
+      const m = text.match(/\|\s+(INFO|WARN|ERROR)\s+\|/);
+      if (m) div.classList.add(m[1]);
+      div.textContent = text;
+      logEl.appendChild(div);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function connect() {
+      statusEl.textContent = 'connecting…';
+      const es = new EventSource('/events');
+
+      es.addEventListener('log', (ev) => appendLine(ev.data));
+
+      es.addEventListener('heartbeat', () => {
+        statusEl.textContent = 'connected (heartbeat OK)';
+      });
+
+      es.onerror = () => {
+        statusEl.textContent = 'disconnected; auto-reconnecting…';
+        // EventSource reconnects automatically.
+      };
+    }
+
+    // Live metrics chart
+    const chartCtx = document.getElementById('metricsChart');
+    const labels = [];
+    const cpuSeries = [];
+    const memSeries = [];
+
+    const chart = new Chart(chartCtx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { 
+            label: 'CPU %', 
+            data: cpuSeries, 
+            borderColor: '#3b82f6', 
+            backgroundColor: 'rgba(59,130,246,0.15)', 
+            borderWidth: 2.5,
+            fill: true,
+            tension: 0.4, 
+            pointRadius: 3,
+            pointHoverRadius: 5,
+            pointBackgroundColor: '#3b82f6',
+            pointBorderColor: '#1e3a8a',
+            pointBorderWidth: 1
+          },
+          { 
+            label: 'Memory %', 
+            data: memSeries, 
+            borderColor: '#10b981', 
+            backgroundColor: 'rgba(16,185,129,0.15)', 
+            borderWidth: 2.5,
+            fill: true,
+            tension: 0.4, 
+            pointRadius: 3,
+            pointHoverRadius: 5,
+            pointBackgroundColor: '#10b981',
+            pointBorderColor: '#065f46',
+            pointBorderWidth: 1
+          },
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        interaction: {
+          intersect: false,
+          mode: 'index'
+        },
+        scales: {
+          y: { 
+            min: 0, 
+            max: 100,
+            ticks: { 
+              color: '#9ca3af',
+              font: { size: 12 },
+              callback: (value) => value + '%'
+            }, 
+            grid: { 
+              color: 'rgba(75,85,99,0.3)',
+              lineWidth: 1
+            },
+            border: { display: false }
+          },
+          x: { 
+            ticks: { 
+              color: '#9ca3af',
+              font: { size: 11 },
+              maxTicksLimit: 10,
+              maxRotation: 0
+            }, 
+            grid: { 
+              color: 'rgba(55,65,81,0.2)',
+              lineWidth: 1
+            },
+            border: { display: false }
+          },
+        },
+        plugins: {
+          legend: { 
+            labels: { 
+              color: '#e5e7eb',
+              font: { size: 13, weight: '500' },
+              padding: 15,
+              usePointStyle: true,
+              pointStyle: 'circle'
+            }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(17,24,39,0.95)',
+            titleColor: '#f3f4f6',
+            bodyColor: '#e5e7eb',
+            borderColor: '#374151',
+            borderWidth: 1,
+            padding: 12,
+            displayColors: true,
+            callbacks: {
+              label: (context) => {
+                return ` ${context.dataset.label}: ${context.parsed.y.toFixed(1)}%`;
+              }
+            }
+          }
+        }
+      }
+    });
+
+    async function pollSystemMetrics() {
+      try {
+        const res = await fetch('/metrics.json?' + Date.now(), { cache: 'no-store' });
+        const data = await res.json();
+        if (!data.ok) return;
+
+        const ts = new Date(data.ts_ms);
+        const label = ts.toLocaleTimeString([], { minute: '2-digit', second: '2-digit' });
+
+        labels.push(label);
+        cpuSeries.push(Number(data.cpu_percent.toFixed(1)));
+        memSeries.push(Number(data.memory_percent.toFixed(1)));
+
+        cpuText.textContent = `${data.cpu_percent.toFixed(1)}%`;
+        memText.textContent = `${data.memory_percent.toFixed(1)}% (${bytesToMiB(data.memory_used_bytes)} / ${bytesToMiB(data.memory_total_bytes)} MiB)`;
+        rssText.textContent = `${bytesToMiB(data.process_rss_bytes)} MiB`;
+
+        // Keep last 60 points
+        while (labels.length > 60) {
+          labels.shift();
+          cpuSeries.shift();
+          memSeries.shift();
+        }
+        chart.update();
+      } catch (_) {
+        // ignore; next poll will retry
+      }
+    }
+
+    connect();
+    setInterval(pollSystemMetrics, 1000);
+    pollSystemMetrics();
+  </script>
+</body>
+</html>
