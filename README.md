@@ -1,4 +1,4 @@
-# Real-Time System Monitor & SSE Log Streaming
+# Real-Time System Monitor & Server-Sent Events Log Streaming
 
 > Comprehensive monitoring solution with real-time system metrics and live log streaming via Server-Sent Events
 
